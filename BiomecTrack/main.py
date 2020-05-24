@@ -1,5 +1,5 @@
 from tkinter import *
-from BiomecTrack.GUI.BMTrack_gui import BMTrack
+from BiomecTrack.APP.BMTrack_gui import BMTrack
 
 
 if __name__ == "__main__":
