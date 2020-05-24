@@ -9,7 +9,7 @@ class Logger:
         self.logger.setLevel(logger_level)
         self.logger.info('Logger Iniciado')
 
-    def log_into_warnning(self, mensage):
+    def log_into_warning(self, mensage):
         self.logger.warning(mensage)
 
     def log_into_info(self, message):
