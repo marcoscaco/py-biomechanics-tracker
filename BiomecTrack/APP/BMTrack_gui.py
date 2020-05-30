@@ -56,7 +56,7 @@ class BMTrack:
         video_menu.add_command(label="Open Camera 3", command=lambda: self.load_video_file(2))
         video_menu.add_command(label="Open Camera 4", command=lambda: self.load_video_file(3))
         menubar.add_cascade(label="Load Videos", menu=video_menu)
-        self.root_element.configure(menu=menubar)
+        self.root_element.configure(menu=menubar, background='black')
 
     def load_video_file(self, cam_number):
         if cam_number == 0:
@@ -178,8 +178,9 @@ class BMTrack:
 
     def create_video_load_progress_bar(self, video_len):
         self.video_load_dialog = Toplevel(self.root_element)
+        self.video_load_dialog.configure(background='gray')
         self.video_load_dialog.title("Video Loading Progress")
-        self.video_load_dialog.geometry(f"500x100+1920+1080")
+        self.video_load_dialog.geometry(f"500x50+{int(self.root_element.winfo_screenwidth()/2)}+{int(self.root_element.winfo_screenheight()/2 )}")
         self.video_load_progress_bar = Progressbar(self.video_load_dialog, maximum=video_len, mode="determinate", length=400)
         self.video_load_progress_bar.grid(row=0, column=1, padx=50, pady=100)
         self.video_load_progress_bar.pack()
