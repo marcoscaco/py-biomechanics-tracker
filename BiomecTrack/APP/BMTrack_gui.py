@@ -40,7 +40,8 @@ class BMTrack:
         self.logger = Logger(logging)
 
         # Define o tamanho da janela principal para o tamanho da tela menos 200 pixels
-        self.root_element.geometry(f"{self.root_element.winfo_screenwidth() - 200}x{self.root_element.winfo_screenheight() - 200}")
+        # self.root_element.geometry(f"{self.root_element.winfo_screenwidth() - 200}x{self.root_element.winfo_screenheight() - 200}")
+        self.root_element.geometry(f"1500x500")
 
         # Keyboard Binding
         self.root_element.bind("<Key>", self.keyboard_handler)
@@ -222,16 +223,28 @@ class BMTrack:
     def show_frame(self, cam_number):
         if cam_number == 0:
             self.camera_been_show = 0
-            image = Image.fromarray(self.camera_1_frames[self.camera_1_frame_count])
+            try:
+                image = Image.fromarray(self.camera_1_frames[self.camera_1_frame_count])
+            except:
+                self.camera_1_frame_count -= 1
         if cam_number == 1:
             self.camera_been_show = 1
-            image = Image.fromarray(self.camera_2_frames[self.camera_2_frame_count])
+            try:
+                image = Image.fromarray(self.camera_2_frames[self.camera_2_frame_count])
+            except:
+                self.camera_2_frame_count -= 1
         if cam_number == 2:
             self.camera_been_show = 2
-            image = Image.fromarray(self.camera_3_frames[self.camera_3_frame_count])
+            try:
+                image = Image.fromarray(self.camera_3_frames[self.camera_3_frame_count])
+            except:
+                self.camera_3_frame_count -= 1
         if cam_number == 3:
             self.camera_been_show = 3
-            image = Image.fromarray(self.camera_4_frames[self.camera_4_frame_count])
+            try:
+                image = Image.fromarray(self.camera_4_frames[self.camera_4_frame_count])
+            except:
+                self.camera_4_frame_count -= 1
         # # ...and then to ImageTk format
         image = ImageTk.PhotoImage(image)
         if self.video_frame_frame is None:
