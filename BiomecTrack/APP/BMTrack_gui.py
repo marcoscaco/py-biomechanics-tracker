@@ -57,6 +57,14 @@ class BMTrack:
         video_menu.add_command(label="Open Camera 3", command=lambda: self.load_video_file(2))
         video_menu.add_command(label="Open Camera 4", command=lambda: self.load_video_file(3))
         menubar.add_cascade(label="Load Videos", menu=video_menu)
+
+        # create a pulldown menu, for loading the videos and add it to the menu bar
+        inference_menu = Menu(menubar, tearoff=0)
+        inference_menu.add_command(label="Inference on: Camera 1", command=lambda: None)
+        inference_menu.add_command(label="Inference on: Camera 2", command=lambda: None)
+        inference_menu.add_command(label="Inference on: Camera 3", command=lambda: None)
+        inference_menu.add_command(label="Inference on: Camera 4", command=lambda: None)
+        menubar.add_cascade(label="Videos Inference", menu=inference_menu)
         self.root_element.configure(menu=menubar, background='gray')
 
     def load_video_file(self, cam_number):
