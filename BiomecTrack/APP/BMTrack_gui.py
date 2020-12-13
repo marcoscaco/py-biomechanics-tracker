@@ -30,8 +30,12 @@ class BMTrack:
     video_load_progress_bar = None
     video_load_progress_text = None
 
-    video_frame_frame = None
     camera_been_show = 0
+
+    video_canvas = None
+    video_canvas_image = None
+
+    current_frame_points = []
 
     def __init__(self, root_element):
         print("Ola construido")
@@ -40,13 +44,16 @@ class BMTrack:
         self.logger = Logger(logging)
 
         # Define o tamanho da janela principal para o tamanho da tela menos 200 pixels
-        # self.root_element.geometry(f"{self.root_element.winfo_screenwidth() - 200}x{self.root_element.winfo_screenheight() - 200}")
-        self.root_element.geometry(f"1500x500")
+        self.root_element.geometry(f"{self.root_element.winfo_screenwidth() - 200}x{self.root_element.winfo_screenheight() - 200}")
+        #self.root_element.geometry(f"1500x500")
 
         # Keyboard Binding
         self.root_element.bind("<Key>", self.keyboard_handler)
         self.root_element.bind("<Left>", self.keyboard_handler)
         self.root_element.bind("<Right>", self.keyboard_handler)
+
+        self.root_element.bind("<Button-1>", self.on_button_press)
+        self.root_element.bind("<Button-2>", self.on_button2_press)
 
         menubar = Menu(root_element)
 
@@ -67,6 +74,11 @@ class BMTrack:
         menubar.add_cascade(label="Videos Inference", menu=inference_menu)
         self.root_element.configure(menu=menubar, background='gray')
 
+        # Define a canvas to show images
+        self.video_canvas = Canvas(self.root_element)
+        # Stretch canvas to root window size.
+        self.video_canvas.pack(fill=BOTH, expand=1)
+
     def load_video_file(self, cam_number):
         if cam_number == 0:
             self.camera_1_video = file_utils.open_video_file(title="Load Cam 1 Video FIle")
@@ -77,6 +89,7 @@ class BMTrack:
                 count = 1
                 self.create_video_load_progress_bar(video_len=video_len)
                 while success:
+                    self.current_frame_points.append(0)
                     # video_read_progress = int(100 * float(count) / float(video_len))
                     success, image = vidcap.read()
                     if image is not None:
@@ -147,7 +160,41 @@ class BMTrack:
                 self.detroy_video_load_progress_bar()
             else:
                 print("Nao carregou")
-    
+
+    def handler_motion(self, event):
+        x, y = event.x, event.y
+        print('{}, {}'.format(x, y))
+
+    def on_button_press(self, even1t):
+        id = self.video_canvas.create_oval(event.x, event.y, event.x + 10, event.y + 10, fill='yellow')
+        print(
+            f"ID DO PONTO: {id}\n"
+            f"cordenadas do ponto {(self.video_canvas.coords(id)[0], self.video_canvas.coords(id)[1])}"
+        )
+        try:
+            self.current_frame_points[self.camera_1_frame_count] = (id, (self.video_canvas.coords(id)[0], self.video_canvas.coords(id)[1]))
+        except IndexError as e:
+            logger = logging.getLogger(__name__)
+            logger.info(e)
+            pass
+
+    def on_button2_press(self, event):
+        # self.video_canvas.delete(
+        #     self.current_frame_points[self.camera_1_frame_count]
+        # )
+
+        print(
+            f"current_frame_points len: {len(self.current_frame_points)}",
+        )
+
+        print(
+            f"current_frame_points: {self.current_frame_points}",
+        )
+
+        print(
+            f"camera_1_frame_count: {self.camera_1_frame_count} ",
+        )
+
     def keyboard_handler(self, event):
         print(f"pressed {repr(event.keysym)}")
         print(event)
@@ -188,6 +235,7 @@ class BMTrack:
             self.camera_3_frame_count -= 1
             self.camera_4_frame_count -= 1
             self.show_frame(self.camera_been_show)
+            self.show_point()
 
         if event.keysym == "Right":
             print("arrow r")
@@ -196,6 +244,7 @@ class BMTrack:
             self.camera_3_frame_count += 1
             self.camera_4_frame_count += 1
             self.show_frame(self.camera_been_show)
+            self.show_point()
 
     def create_video_load_progress_bar(self, video_len):
         self.video_load_dialog = Toplevel(self.root_element)
@@ -228,40 +277,79 @@ class BMTrack:
         Label(help_top, text="press R to reset").pack()
         Label(help_top, text="press H to show help").pack()
 
+    def show_point(self):
+        if self.camera_been_show == 0:
+            pos = self.current_frame_points[self.camera_1_frame_count]
+            if not isinstance(pos, int):
+                pos = pos[1]
+                print(pos)
+                self.video_canvas.create_oval(pos[0], pos[1], pos[0] + 10, pos[1] + 10, fill='yellow')
+
     def show_frame(self, cam_number):
+        print("SHOW FRAME!!!!")
         if cam_number == 0:
             self.camera_been_show = 0
             try:
                 image = Image.fromarray(self.camera_1_frames[self.camera_1_frame_count])
+                resized = image.resize(
+                    size=(self.root_element.winfo_screenwidth() - 500,self.root_element.winfo_screenheight() - 500),
+                    resample=Image.ANTIALIAS
+                )
+
+                image = image
             except:
                 self.camera_1_frame_count -= 1
         if cam_number == 1:
             self.camera_been_show = 1
             try:
                 image = Image.fromarray(self.camera_2_frames[self.camera_2_frame_count])
+                resized = image.resize(
+                    size=(self.root_element.winfo_screenwidth() - 500, self.root_element.winfo_screenheight() - 500),
+                    resample=Image.ANTIALIAS
+                )
+
+                image = resized
             except:
                 self.camera_2_frame_count -= 1
         if cam_number == 2:
             self.camera_been_show = 2
             try:
                 image = Image.fromarray(self.camera_3_frames[self.camera_3_frame_count])
+                resized = image.resize(
+                    size=(self.root_element.winfo_screenwidth() - 500, self.root_element.winfo_screenheight() - 500),
+                    resample=Image.ANTIALIAS
+                )
+
+                image = resized
             except:
-                self.camera_3_frame_count -= 1
+                self.camera_3_frame_count -= 111
         if cam_number == 3:
             self.camera_been_show = 3
             try:
                 image = Image.fromarray(self.camera_4_frames[self.camera_4_frame_count])
+                resized = image.resize(
+                    size=(self.root_element.winfo_screenwidth() - 500, self.root_element.winfo_screenheight() - 500),
+                    resample=Image.ANTIALIAS
+                )
+
+                image = resized
             except:
                 self.camera_4_frame_count -= 1
         # # ...and then to ImageTk format
-        image = ImageTk.PhotoImage(image)
-        if self.video_frame_frame is None:
-            self.video_frame_frame = Label(self.root_element, image=image)
-            self.video_frame_frame.image = image
-            self.video_frame_frame.grid()
-        else:
-            self.video_frame_frame.configure(image=image)
-            self.video_frame_frame.image = image
+        self.video_canvas_image = ImageTk.PhotoImage(image)
+        self.video_canvas.create_image(
+            0, 0, anchor=NW, image=self.video_canvas_image
+        )
+
+
+        id = self.video_canvas.create_oval(event.x, event.y, event.x + 10, event.y + 10, fill='yellow')
+        print(
+            f"ID DO PONTO: {id}\n"
+            f"cordenadas do ponto {(self.video_canvas.coords(id)[0], self.video_canvas.coords(id)[1])}"
+        )
+        self.current_frame_points[self.camera_1_frame_count] = id
+
+
         self.root_element.update()
 
     def reset_frames(self):
