@@ -15,7 +15,7 @@ msgpack-numpy==0.4.6.post0
 networkx==2.4
 numpy==1.18.4
 opencv-python==4.2.0.34
-Pillow==7.1.2
+Pillow==8.2.0
 psutil==5.7.0
 pycocotools==2.0.0
 pyparsing==3.0.0a1
